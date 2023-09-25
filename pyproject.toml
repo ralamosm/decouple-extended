@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "decouple-extended"
-version = "0.1.5"
+version = "0.1.6"
 description = " Simple extensions to python-decouple"
 authors = ["Roberto Alamos <ralamosm@gmail.com>"]
 readme = "README.md"
@@ -9,16 +9,16 @@ packages = [{include = "decouple_extended"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 python-decouple = "^3.8"
-boto3 = "^1.28.33"
 pydantic = "^1.10.11"
+boto3 = "^1.28.17"
 
 
-[tool.poetry.group.test.dependencies]
+[tool.poetry.group.tests.dependencies]
 pytest = "^7.4.0"
 pre-commit = "^3.3.3"
 moto = "^4.2.0"
 
-[tool.poetry.group.test]
+[tool.poetry.group.tests]
 optional = true
 
 [build-system]
