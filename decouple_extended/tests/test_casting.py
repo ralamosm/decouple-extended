@@ -15,10 +15,10 @@ from decouple_extended import crud
 from decouple_extended.extensions import ConfigByModel
 
 
-class TestModel(BaseModel):
+class DummyModel(BaseModel):
     """Model to be used for testing casting by pydantic"""
 
-    int1: int
+    int1: Optional[int] = None
     dict1: Union[dict, Json]
     bool1: Optional[bool] = None
 
@@ -82,7 +82,7 @@ def test_casting_filebased_by_pydantic(repo_cls, config_data):
     m = mock_open(read_data=config_data)
 
     with patch("builtins.open", m), patch("decouple.open", m):
-        config = ConfigByModel(repo_cls("/path/to/config_file"), TestModel)
+        config = ConfigByModel(repo_cls("/path/to/config_file"), DummyModel)
 
         int1 = config("int1")
         dict1 = config("dict1")
@@ -108,7 +108,7 @@ def test_casting_aws_by_pydantic(repo_cls, aws_service, aws_method, aws_kwargs):
         getattr(awscli, aws_method)(**kwargs)
 
         repository = repo_cls(config_name)
-        config = ConfigByModel(repository, TestModel)
+        config = ConfigByModel(repository, DummyModel)
 
         int1 = config("int1")
         dict1 = config("dict1")
@@ -129,7 +129,7 @@ def test_crud_casting_filebased_by_pydantic(repo_cls, config_data):
     m = mock_open(read_data=config_data)
 
     with patch("builtins.open", m), patch("decouple.open", m):
-        config = crud.CRUDConfigByModel(repo_cls("/path/to/config_file"), TestModel)
+        config = crud.CRUDConfigByModel(repo_cls("/path/to/config_file"), DummyModel)
 
         int1 = config("int1")
         dict1 = config("dict1")
@@ -168,7 +168,7 @@ def test_crud_casting_aws_by_pydantic(repo_cls, aws_service, aws_method, aws_kwa
         getattr(awscli, aws_method)(**kwargs)
 
         repository = repo_cls(config_name)
-        config = crud.CRUDConfigByModel(repository, TestModel)
+        config = crud.CRUDConfigByModel(repository, DummyModel)
 
         int1 = config("int1")
         dict1 = config("dict1")

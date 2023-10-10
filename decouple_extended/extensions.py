@@ -9,6 +9,10 @@ from pydantic import BaseModel
 from pydantic import create_model
 
 
+# Temporary fix until pydantic 2.4.3 due to issue https://github.com/pydantic/pydantic/issues/7720
+import json
+
+
 class ConfigBaseModel(BaseModel):
     """Base class used by ConfigByModel to create one model per field"""
 
@@ -30,7 +34,7 @@ class ConfigByModel(object):
     def create_field_models(self, model: Type[BaseModel]) -> Dict[str, Type[BaseModel]]:
         field_models = {}
 
-        for field_name, field in model.__fields__.items():
+        for field_name, field in model.model_fields.items():
             # Dynamically create a Pydantic model for the individual field
             attributes = {field_name: (field.annotation, field.default)}
             field_model = ConfigBaseModel.with_fields(**attributes)
@@ -41,12 +45,16 @@ class ConfigByModel(object):
     def _cast_with_pydantic(self, option, value):
         if self.model is None:
             return value
+        
+        # Temporary fix until pydantic 2.4.3 due to issue https://github.com/pydantic/pydantic/issues/7720
+        try:
+            value = json.loads(value) if value.startswith('{') and value.endswith('}') else value
+        except Exception:
+            # any exception means value doesn't seems to be a json string
+            pass
 
-        parsed_data = self.models_by_field[option].parse_obj({option: value})
+        parsed_data = self.models_by_field[option].model_validate({option: value})
         return getattr(parsed_data, option)
-        # except ValueError:
-        #    # If the attribute doesn't exist or there's an error parsing, return the default value
-        #    return self.model.__fields__[option].default
 
     def get(self, option, default=undefined, cast=undefined):
         """
@@ -62,7 +70,7 @@ class ConfigByModel(object):
             if default and not isinstance(default, Undefined):
                 value = default
             else:
-                value = self.model.__fields__[
+                value = self.model.model_fields[
                     option
                 ].default  # must be none because it wasn't caught by the repository, but still is defined in the model
         else:
